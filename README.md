@@ -28,3 +28,15 @@ pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio===0.9.0 -f h
 ~~~
 
 5 Run main.py to use it right away.
+
+
+
+
+
+## Reference
+1) [Yolov5_DeepSort_Pytorch](https://github.com/mikel-brostrom/Yolov5_DeepSort_Pytorch)   
+2) [yolov5](https://github.com/ultralytics/yolov5)  
+3) [deep_sort_pytorch](https://github.com/ZQPei/deep_sort_pytorch)       
+4) [deep_sort](https://github.com/nwojke/deep_sort)
+5) [Yolov5_DeepSort_Pytorch](https://github.com/dongdv95/yolov5/tree/master/Yolov5_DeepSort_Pytorch)
+
