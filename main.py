@@ -107,8 +107,8 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
 
 
 
-        # self.deep_sort_model = 'osnet_ibn_x1_0'
-        self.deep_sort_model = 'osnet_x0_25'
+        self.deep_sort_model = 'osnet_ibn_x1_0'
+        # self.deep_sort_model = 'osnet_x0_25'
         self.output = 'inference/output'
         self.imgsz = (640, 640)
         self.device = ''
@@ -154,13 +154,13 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
             i.append(0)
 
 
-        print('area_list', self.area_list)
-        print('data_in', self.data_in)
-        print('data_out', self.data_out)
-        print('yolo',self.yolo_model)
-        print('iou', self.iou_thres)
-        print('conf', self.conf_thres)
-        print('save_vid', self.save_vid)
+        # print('area_list', self.area_list)
+        # print('data_in', self.data_in)
+        # print('data_out', self.data_out)
+        # print('yolo',self.yolo_model)
+        # print('iou', self.iou_thres)
+        # print('conf', self.conf_thres)
+        # print('save_vid', self.save_vid)
 
 
 
@@ -195,7 +195,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
         save_dir = increment_path(Path(self.project) / self.name, exist_ok=self.exist_ok)  # increment run
         save_dir.mkdir(parents=True, exist_ok=True)  # make dir
 
-        print('save_dir',save_dir)
+        # print('save_dir',save_dir)
 
         # Load model
         device = select_device(self.device)
@@ -232,8 +232,8 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
         txt_file_name = source.split('/')[-1].split('.')[0]
         txt_path = str(Path(save_dir)) + '/' + txt_file_name + '.txt'
 
-        print('txt_file_name', txt_file_name)
-        print('txt_path',txt_path)
+        # print('txt_file_name', txt_file_name)
+        # print('txt_path',txt_path)
 
         if pt and device.type != 'cpu':
             model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters())))  # warmup
@@ -543,7 +543,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
         self.rectangle_color = (0, 255, 0)
         self.circle_color = (0, 0, 255)
         self.line_thickness = 1
-        self.circle_radius = 8
+        self.circle_radius = 6
 
         self.line_color = (0, 0, 255)
         self.circle_line_color = (255, 0, 0)
@@ -613,7 +613,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
             cv2.circle(image, tuple(circles[i]), self.circle_radius, self.circle_color, -1)
             cv2.line(image, tuple(circles[i]), tuple(circles[(i + 1) % 4]), self.rectangle_color, self.line_thickness)
 
-        polyline = True
+        polyline = False
         if polyline == True:
             for i in range(2):
                 if i == 0:
