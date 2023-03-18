@@ -826,7 +826,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
         self.displayImage.setPixmap(QPixmap.fromImage(image))
 
     def resize_iamge(self,image):
-        print(image.shape)
+        # print(image.shape)
         ih, iw, = image.shape[0],image.shape[1]
         w = 1280
         h = 720
@@ -865,7 +865,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
             pass
 
     def detect_video(self):
-        print('area',self.area)
+        # print('area',self.area)
         self.btn_Start.hide()
         self.btn_stop.show()
         self.btn_submit.setEnabled(False)
