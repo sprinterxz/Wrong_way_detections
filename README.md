@@ -24,7 +24,7 @@ pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio===0.9.0 -f h
 
 4 For other YOLOv5 models, you can be downloaded at https://github.com/ultralytics/yolov5
 ~~~
-#Place the file in the yolo_model directory.
+#Place the file in the "wrong_way_detection/yolo_model" directory.
 ~~~
 
 5 Run main.py to use it right away.
