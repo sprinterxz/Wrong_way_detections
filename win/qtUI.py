@@ -35,7 +35,7 @@ class Ui_MainWindow(object):
         self.listWidget = QtWidgets.QListWidget(self.verticalLayoutWidget)
         font = QtGui.QFont()
         font.setFamily("Poppins Medium")
-        font.setPointSize(10)
+        font.setPointSize(8)
         self.listWidget.setFont(font)
         self.listWidget.setObjectName("listWidget")
         self.verticalLayout.addWidget(self.listWidget)

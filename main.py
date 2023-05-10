@@ -49,15 +49,15 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
 
         self.source = '0'
         self.area = []
-        self.iou_thres = 0.35
-        self.conf_thres = 0.25
+        self.iou_thres = 0.28
+        self.conf_thres = 0.17
         self.yolo_model = 'yolo_model/yolov5n.pt'
         self.classes = [2,3,5,7]
         self.filename_temp = ''
         self.filename_label_temp = ''
 
-        self.iou_thres_default = 0.35
-        self.conf_thres_default = 0.25
+        self.iou_thres_default = 0.28
+        self.conf_thres_default = 0.17
         self.yolo_model_default = 'yolo_model/yolov5n.pt'
         self.output_path = 'runs/track'
 
@@ -104,11 +104,10 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
             self.settings_ui.setting_comboBox.addItem(file)
         self.settings_ui.setting_comboBox.setCurrentText('yolov5n.pt')
         self.settings_ui.setting_comboBox.currentIndexChanged.connect(self.select_model)
-
+        # self.deep_sort_model = 'osnet_x0_25'
 
 
         self.deep_sort_model = 'osnet_ibn_x1_0'
-        # self.deep_sort_model = 'osnet_x0_25'
         self.output = 'inference/output'
         self.imgsz = (640, 640)
         self.device = ''
@@ -141,17 +140,32 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
         self.area_list = []
         self.data_in = []
         self.data_out = []
-
-        for i in self.area:
+        self.area_names = []
+        print(self.area)
+        for i,area in enumerate(self.area):
             self.area_list.append([])
             self.data_in.append([])
             self.data_out.append([])
-
+            self.area_names.append(f'area{i+1}')
+        print(self.area_names)
         for i in self.area_list:
             i.append([])
             i.append([])
             i.append(0)
             i.append(0)
+
+        self.area_result = {a: {
+            'car_RW': [],
+            'car_WW': [],
+            'motorcycle_RW': [],
+            'motorcycle_WW': [],
+            'bus_RW': [],
+            'bus_WW': [],
+            'truck_RW': [],
+            'truck_WW': []
+        } for a in self.area_names}
+
+
 
 
         # print('area_list', self.area_list)
@@ -317,7 +331,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
 
                             annotator.box_label(bboxes, label, color=colors(c, True))
 
-                            self.count_total(bboxes,id)
+                            self.counting(bboxes,id,names[c])
 
                             # if self.save_txt:
                             #     # to MOT format
@@ -394,11 +408,36 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
 
             self.listWidget.clear()
             if self.area != []:
-                for i ,data in enumerate(self.area_list):
-                    self.listWidget.addItem(f'------- Area : {i + 1} --------')
-                    self.listWidget.addItem(f'Right way detection - {data[2]}')
-                    self.listWidget.addItem(f'Wrong way detection - {data[3]}')
-                    self.listWidget.addItem(f'Total detection     - {data[2]+data[3]}')
+                # for i ,data in enumerate(self.area_list):
+                    # self.listWidget.addItem(f'------- Area : {i + 1} --------')
+                    # self.listWidget.addItem(f'Right way detection - {data[2]}')
+                    # self.listWidget.addItem(f'Wrong way detection - {data[3]}')
+                    # self.listWidget.addItem(f'Total detection     - {data[2]+data[3]}')
+                # motorcycle = 'motorcycle'
+                # for area, values in self.area_result.items():
+                #     self.listWidget.addItem(f'------- {area} --------')
+                #     self.listWidget.addItem(f'Motorcycle - {values[motorcycle]} : {values[motorcycle]}')
+                    # self.listWidget.addItem(f'Car - {len(value["car_RW"])} : {len(value["car_WW"])}')
+                    # self.listWidget.addItem(f'Bus - {len(value["bus_RW"])} : {len(value["bus_WW"])}')
+                    # self.listWidget.addItem(f'Truck - {len(value["truck_RW"])} : {len(value["truck_WW"])}')
+
+                for area, value in self.area_result.items():
+                    car_RW_count = len(value['car_RW'])
+                    car_WW_count = len(value['car_WW'])
+                    motorcycle_RW_count = len(value['motorcycle_RW'])
+                    motorcycle_WW_count = len(value['motorcycle_WW'])
+                    bus_RW_count = len(value['bus_RW'])
+                    bus_WW_count = len(value['bus_WW'])
+                    truck_RW_count = len(value['truck_RW'])
+                    truck_WW_count = len(value['truck_WW'])
+                    total_RW_count = car_RW_count + motorcycle_RW_count + bus_RW_count + truck_RW_count
+                    total_WW_count = car_WW_count + motorcycle_WW_count + bus_WW_count + truck_WW_count
+                    self.listWidget.addItem(f'------- {area}--------')
+                    self.listWidget.addItem(f'motorcycle -right {motorcycle_RW_count} : wrong {motorcycle_WW_count}')
+                    self.listWidget.addItem(f'car - right {car_RW_count} : wrong {car_WW_count}')
+                    self.listWidget.addItem(f'Bus - right {bus_RW_count} : wrong {bus_WW_count}')
+                    self.listWidget.addItem(f'Truck - right {truck_RW_count} : wrong {truck_WW_count}')
+                    self.listWidget.addItem(f'Total - right {total_RW_count} : wrong {total_WW_count}')
 
         # Print results
         t = tuple(x / seen * 1E3 for x in dt)  # speeds per image
@@ -409,14 +448,37 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
         if self.save_txt:
             with open(txt_path, 'a') as f:
                 if self.area != []:
-                    for i, data in enumerate(self.area_list):
-                        f.write(f'------- Area : {i + 1} --------\n')
-                        f.write(f'Right way detection - {data[2]}\n')
-                        f.write(f'Wrong way detection - {data[3]}\n')
-                        f.write(f'Total detection     - {data[2] + data[3]}\n')
+                    for area, value in self.area_result.items():
+                        car_RW_count = len(value['car_RW'])
+                        car_WW_count = len(value['car_WW'])
+                        motorcycle_RW_count = len(value['motorcycle_RW'])
+                        motorcycle_WW_count = len(value['motorcycle_WW'])
+                        bus_RW_count = len(value['bus_RW'])
+                        bus_WW_count = len(value['bus_WW'])
+                        truck_RW_count = len(value['truck_RW'])
+                        truck_WW_count = len(value['truck_WW'])
+                        total_RW_count = car_RW_count + motorcycle_RW_count + bus_RW_count + truck_RW_count
+                        total_WW_count = car_WW_count + motorcycle_WW_count + bus_WW_count + truck_WW_count
+                        f.write(f'------- {area}--------\n')
+                        f.write(f'motorcycle -right {motorcycle_RW_count} : wrong {motorcycle_WW_count}\n')
+                        f.write(f'car - right {car_RW_count} : wrong {car_WW_count}\n')
+                        f.write(f'Bus - right {bus_RW_count} : wrong {bus_WW_count}\n')
+                        f.write(f'Truck - right {truck_RW_count} : wrong {truck_WW_count}\n')
+                        f.write(f'Total - right {total_RW_count} : wrong {total_WW_count}\n')
+
+        print('my_dict', self.area_result['area1'])
 
         if self.save_txt or self.save_vid:
             print('Results saved to %s' % save_path)
+            QMessageBox.question(self, 'Results saved', 'Results saved to %s' % save_path)
+            #                              QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            # reply = QMessageBox.question(self, 'Results saved', 'Results saved to %s' % save_path,
+            #                              QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+            # if reply == QMessageBox.Yes:
+            #     event.accept()
+            # else:
+            #     event.accept()
             if platform == 'darwin':  # MacOS
                 os.system('open ' + save_path)
 
@@ -430,14 +492,13 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
             self.btn_undo.setEnabled(True)
         cv2.destroyAllWindows()
 
-    def count_total(self,box,id):
+    def counting(self,box,id,name):
         center_coordinates = (int(box[0] + (box[2] - box[0]) / 2), int(box[1] + (box[3] - box[1]) / 2))
-        object_x = center_coordinates[0]
-        object_y = center_coordinates[1]
-
+        # object_x = center_coordinates[0]
+        # object_y = center_coordinates[1]
         if len(self.area) != 0:
             for i,area in enumerate(self.area):
-                inout = self.box_position(area)
+                inout = self.aera_line_position(area)
                 index = i
                 for i, io in enumerate(inout):
                     pts = io
@@ -456,6 +517,14 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
                                 # print('wrong',id)
                                 self.area_list[index][1].append(id)
                                 self.area_list[index][3] += 1
+                                if name == 'car':
+                                    self.area_result[f'area{index + 1}']['car_WW'].append(id)
+                                elif name == 'motorcycle':
+                                    self.area_result[f'area{index + 1}']['motorcycle_WW'].append(id)
+                                elif name == 'bus':
+                                    self.area_result[f'area{index + 1}']['bus_WW'].append(id)
+                                elif name == 'truck':
+                                    self.area_result[f'area{index + 1}']['truck_WW'].append(id)
                             if id not in self.data_in[index]:
                                 self.data_in[index].append(id)
                     else:
@@ -471,15 +540,23 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
                                 # print('right',id)
                                 self.area_list[index][0].append(id)
                                 self.area_list[index][2] += 1
+                                if name == 'car':
+                                    self.area_result[f'area{index + 1}']['car_RW'].append(id)
+                                elif name == 'motorcycle':
+                                    self.area_result[f'area{index + 1}']['motorcycle_RW'].append(id)
+                                elif name == 'bus':
+                                    self.area_result[f'area{index + 1}']['bus_RW'].append(id)
+                                elif name == 'truck':
+                                    self.area_result[f'area{index + 1}']['truck_RW'].append(id)
                             if id not in self.data_out[index]:
                                 self.data_out[index].append(id)
 
-                pts = area
-                pts_array = np.array(pts, np.int32)
-                dist = cv2.pointPolygonTest(pts_array, center_coordinates, False)
-                # if dist == 1.0 and id not in self.data_in[index]:
-                #     self.area_list[index][1].append(id)
-                #     self.area_list[index][3] += 1
+                # pts = area
+                # pts_array = np.array(pts, np.int32)
+                # dist = cv2.pointPolygonTest(pts_array, center_coordinates, False)
+                # # if dist == 1.0 and id not in self.data_in[index]:
+                # #     self.area_list[index][1].append(id)
+                # #     self.area_list[index][3] += 1
 
 
     def select_model(self):
@@ -542,7 +619,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
 
         self.rectangle_color = (0, 255, 0)
         self.circle_color = (0, 0, 255)
-        self.line_thickness = 1
+        self.line_thickness = 2
         self.circle_radius = 6
 
         self.line_color = (0, 0, 255)
@@ -579,7 +656,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
         self.btn_creat_area.setEnabled(True)
         self.btn_Start.setEnabled(True)
 
-    def box_position(self,area):
+    def aera_line_position(self,area):
         inout = []
         for i in range(2):
             if i == 0:
@@ -587,16 +664,13 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
 
             else:
                 line = (area[3],area[2])
-            # calculate the length of the line
             # Calculate the length of the line
             length = math.sqrt((line[1][0] - line[0][0]) ** 2 + (line[1][1] - line[0][1]) ** 2)
-
             # Calculate the angle of the line
             angle = math.degrees(math.atan2(line[1][1] - line[0][1], line[1][0] - line[0][0]))
-
             # Define the rectangle parameters
             rect_center = ((line[0][0] + line[1][0]) / 2, (line[0][1] + line[1][1]) / 2)
-            rect_size = (int(length), 18)
+            rect_size = (int(length), 12)
             rect_angle = angle
 
             # Calculate the four corner points of the rectangle
@@ -630,7 +704,7 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
 
                 # Define the rectangle parameters
                 rect_center = ((line[0][0] + line[1][0]) / 2, (line[0][1] + line[1][1]) / 2)
-                rect_size = (int(length), 18)
+                rect_size = (int(length), 12)
                 rect_angle = angle
 
                 # Calculate the four corner points of the rectangle
@@ -722,6 +796,11 @@ class MainWindow(QMainWindow, Ui_MainWindow,Ui_setting_Window):
             cv2.namedWindow('rectangle')
             cv2.setMouseCallback('rectangle', self.mouse_callback)
             self.btn_creat_area.setEnabled(False)
+            screen_width, screen_height = cv2.getWindowImageRect('rectangle')[2:]
+            window_width, window_height = cv2.getWindowImageRect('rectangle')[2:]
+            center_x = int((screen_width - window_width) / 2)
+            center_y = int((screen_height - window_height) / 2)
+            cv2.moveWindow('rectangle', center_x, center_y)
 
             if len(self.area) == 0:
                 while True:

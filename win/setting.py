@@ -121,5 +121,5 @@ class Ui_setting_Window(object):
         self.label_5.setText(_translate("setting_Window", "Object confidence threshold"))
         self.label_3.setText(_translate("setting_Window", "Yolo model"))
         self.btn_setting_submit.setText(_translate("setting_Window", "submit"))
-        self.btn_setting_cancle.setText(_translate("setting_Window", "cancle"))
+        self.btn_setting_cancle.setText(_translate("setting_Window", "cancel"))
         self.btn_setting_folder.setText(_translate("setting_Window", "Folder Selection"))
