@@ -1,4 +1,4 @@
-![Alt text]([image link](https://drive.google.com/drive/folders/1N9Kb2ik64WT6K1zKpnOSrShwnqMtSJUi?hl=th))
+![346127867_784718136626264_6054495706195839896_n](https://github.com/sprinterxz/Wrong_way_detections/assets/110600578/9587197b-aa36-4b0b-b4c6-31e9368534a4)
 
 # Wrong_way_detections_UI
 wrong wat detections UI counting a vehicle wth yolov5 deepsort and Pyqt5
